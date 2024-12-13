@@ -151,8 +151,6 @@ SQLGLPIPWD=$(openssl rand -base64 48 | cut -c1-12 )
 systemctl start mariadb
 sleep 1
 
-# Set the root password
-mysql -e "UPDATE mysql.user SET Password = PASSWORD('$SLQROOTPWD') WHERE User = 'root'"
 # Remove anonymous user accounts
 mysql -e "DELETE FROM mysql.user WHERE User = ''"
 # Disable remote root login
@@ -171,12 +169,13 @@ mysql -e "GRANT ALL PRIVILEGES ON glpi.* TO 'glpi_user'@'localhost'"
 mysql -e "FLUSH PRIVILEGES"
 
 # Initialize time zones datas
-mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p'$SLQROOTPWD' mysql
+mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql
 #Ask tz
 dpkg-reconfigure tzdata
 systemctl restart mariadb
 sleep 1
 mysql -e "GRANT SELECT ON mysql.time_zone_name TO 'glpi_user'@'localhost'"
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$SLQROOTPWD'"
 }
 
 function install_glpi()
