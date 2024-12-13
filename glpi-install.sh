@@ -185,26 +185,26 @@ info "Downloading and installing the latest version of GLPI..."
 DOWNLOADLINK=$(curl -s https://api.github.com/repos/glpi-project/glpi/releases/latest | jq -r '.assets[0].browser_download_url')
 wget -O /tmp/glpi-latest.tgz $DOWNLOADLINK
 tar xzf /tmp/glpi-latest.tgz -C /var/www/html/
+touch /var/www/html/glpi/files/_log/php-errors.log
 
 # Add permissions
 chown -R www-data:www-data /var/www/html/glpi
 chmod -R 775 /var/www/html/glpi
-
 # Setup vhost
 cat > /etc/apache2/sites-available/000-default.conf << EOF
 <VirtualHost *:80>
-       DocumentRoot /var/www/html/glpi/public  
+       DocumentRoot /var/www/html/glpi/public
        <Directory /var/www/html/glpi/public>
                 Require all granted
                 RewriteEngine On
                 RewriteCond %{REQUEST_FILENAME} !-f
                 RewriteRule ^(.*)$ index.php [QSA,L]
         </Directory>
-        
+
         LogLevel warn
         ErrorLog \${APACHE_LOG_DIR}/error-glpi.log
         CustomLog \${APACHE_LOG_DIR}/access-glpi.log combined
-        
+
 </VirtualHost>
 EOF
 
